@@ -8,3 +8,4 @@ app = FastAPI(
 
 traffic_data = []
 sensor_data = []
+
