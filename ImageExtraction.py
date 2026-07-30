@@ -9,6 +9,9 @@ model = YOLO("yolov8n.pt")
 # Path to your images
 DATA_DIR = Path("Data Folder")
 
+# Backend endpoint
+BACKEND_URL = "http://127.0.0.1:8000/traffic"
+
 # Store results for each image
 results_list = []
 
@@ -17,6 +20,8 @@ vehicle_counts = []
 pedestrian_counts = []
 
 average_counts = {}
+
+
 
 starting_image=""
 ending_image=""
@@ -69,17 +74,36 @@ for image_path in sorted(DATA_DIR.rglob("*")):
         average_vehicle = int(sum(vehicle_counts) / 5)
         average_pedestrian = int(sum(pedestrian_counts) / 5)
 
+        summary = {
+            "camera_id": image_path.parent.name,
+            "starting_image": starting_image,
+            "ending_image": image_path.name,
+            "average_vehicles": average_vehicle,
+            "average_pedestrians": average_pedestrian,
+        }
+
         '''print("\n----- Average of Previous 5 Images -----")
         print(f"Average vehicles: {average_vehicle:.2f}")
         print(f"Average pedestrians: {average_pedestrian:.2f}")
         print("----------------------------------------\n")'''
 
+        try:
+            response = requests.post(
+                BACKEND_URL,
+                json=summary
+            )
+
+            print("Status:", response.status_code)
+
+        except Exception as e:
+            print("Could not connect to backend:", e)
+        
         # Reset for the next group of five
         vehicle_counts.clear()
         pedestrian_counts.clear()
         ending_image=image_path.name
 # If there are leftover images (not a multiple of 5)
-    if vehicle_counts:
+    if len(vehicle_counts)>0:
 
         average_vehicle = int(sum(vehicle_counts) / len(vehicle_counts))
         average_pedestrian = int(sum(pedestrian_counts) / len(pedestrian_counts))
@@ -89,11 +113,28 @@ for image_path in sorted(DATA_DIR.rglob("*")):
         average_counts["Starting Image"] = starting_image
         average_counts["Ending Image"] = ending_image
 
+        summary = {
+        "camera_id": image_path.parent.name,
+        "starting_image": starting_image,
+        "ending_image": image_path.name,
+        "average_vehicles": sum(vehicle_counts) / len(vehicle_counts),
+        "average_pedestrians": sum(pedestrian_counts) / len(pedestrian_counts),
+        }
+
         '''print("\n----- Final Partial Group -----")
         print(f"Average vehicles: {average_vehicle:.2f}")
         print(f"Average pedestrians: {average_pedestrian:.2f}")
         print("Starting Image:", starting_image)
         print("Ending Image:", ending_image)'''
         print(average_counts)
-        response = requests.post("http://127.0.0.1:8000/traffic",json=average_counts)
+        try:
+            response = requests.post(
+                BACKEND_URL,
+                json=summary
+            )
+
+            print("Status:", response.status_code)
+
+        except Exception as e:
+            print("Could not connect to backend:", e)
         average_counts.clear()
