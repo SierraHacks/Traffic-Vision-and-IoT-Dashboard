@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from models.post import UserPost
+from pydantic import BaseModel
+from datetime import datetime
 
 app = FastAPI(
     title="Traffic Vision & IoT Dashboard API",
@@ -21,6 +22,8 @@ class TrafficData(BaseModel):
 def receive_traffic(data: TrafficData):
 
     traffic_data.append(data.model_dump())
+
+    print(traffic_data)
 
     return {
         "message": "Traffic data received",
