@@ -12,16 +12,21 @@ sensor_data = []
 
 class TrafficData(BaseModel):
     camera_id: str
-    average_vehicle = float
+    starting_image: str
+    ending_image: str
+    average_vehicles: float
     average_pedestrians: float
-    max_vehicles = str
     
 @app.post("/traffic")
 def receive_traffic(data: TrafficData):
 
-    traffic_data.append(data)
+    traffic_data.append(data.model_dump())
 
     return {
         "message": "Traffic data received",
-        "camera": data.camera_id
     }
+
+@app.get("/traffic")
+def get_traffic():
+    return traffic_data
+
