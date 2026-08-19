@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Traffic Vision & IoT Dashboard API",
@@ -32,4 +33,12 @@ def receive_traffic(data: TrafficData):
 @app.get("/traffic")
 def get_traffic():
     return traffic_data
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 

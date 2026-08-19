@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 const COLORS = {
-  bg: "#0A0F1A",
+  bg: "#010101",
   panel: "#111A2C",
   panelAlt: "#0D1524",
   border: "rgba(148,163,184,0.14)",
@@ -117,8 +117,9 @@ let alertSeq = 1;
 export default function Dashboard() {
   const [active, setActive] = useState(true);
   const [clock, setClock] = useState(new Date());
-  const [carCount, setCarCount] = useState(5);
-  const [personCount, setPersonCount] = useState(12);
+  const [carCount, setCarCount] = useState(0);
+  const [personCount, setPersonCount] = useState(0);
+  const [trafficData, setTrafficData] = useState([]);
   const [alerts, setAlerts] = useState([
     { id: 0, ...ALERT_TEMPLATES[0], time: "12:41:02", pin: "p1" },
     { id: -1, ...ALERT_TEMPLATES[2], time: "12:38:47", pin: "p3" },
@@ -139,16 +140,6 @@ export default function Dashboard() {
     const iv = setInterval(() => setClock(new Date()), 1000);
     return () => clearInterval(iv);
   }, []);
-
-  // live-ish counters only tick when in active/THV mode
-  useEffect(() => {
-    if (!active) return;
-    const iv = setInterval(() => {
-      setCarCount((c) => Math.max(1, c + (Math.random() > 0.5 ? 1 : -1)));
-      setPersonCount((p) => Math.max(0, p + (Math.random() > 0.55 ? 1 : -1)));
-    }, 1800);
-    return () => clearInterval(iv);
-  }, [active]);
 
   // simulated incoming alerts
   useEffect(() => {
@@ -175,6 +166,58 @@ export default function Dashboard() {
     return () => clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  useEffect(() => {
+
+    const fetchTraffic = async () => {
+
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/traffic"
+            );
+
+            const data = await response.json();
+
+            setTrafficData(data);
+
+
+            if(data.length > 0){
+
+                const latest = data[data.length - 1];
+
+                setCarCount(
+                    latest.average_vehicles
+                );
+
+                setPersonCount(
+                    latest.average_pedestrians
+                );
+            }
+
+        } catch(error){
+            console.log(
+                "Backend connection failed",
+                error
+            );
+        }
+
+    };
+
+
+    fetchTraffic();
+
+
+    const interval = setInterval(
+        fetchTraffic,
+        5000
+    );
+
+
+    return () => clearInterval(interval);
+
+
+}
+)
 
   function triggerCollision() {
     setCollision(true);
