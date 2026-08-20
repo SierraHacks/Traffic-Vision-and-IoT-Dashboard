@@ -1,6 +1,24 @@
 {
+  "name": "traffic-vision-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite",
+    "preview": "vite"
+  },
   "dependencies": {
-    "lucide-react": "^1.29.0",
-    "recharts": "^3.10.1"
+    "lucide-react": "^1.33.0",
+    "recharts": "^3.10.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^7.1.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
